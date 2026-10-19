@@ -10,7 +10,7 @@ final class LicenseManagerTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        suiteName = "com.lwouis.alt-tab-macos.tests.license"
+        suiteName = "nl.applab.alt-tab-macos.tests.license"
         defaults = TestDefaults.make(suiteName)
         clock = MockClock(now: Date(timeIntervalSince1970: 1_700_000_000))
         keychain = MockKeychain()
