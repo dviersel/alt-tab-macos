@@ -20,7 +20,8 @@ class LicenseManager {
             clock: SystemClock(),
             keychain: keychain,
             api: RemoteLicenseClient(baseUrl: Endpoints.licenseApiBaseUrl, keychain: keychain),
-            defaults: UserDefaults(suiteName: defaultsSuiteName)!
+            defaults: UserDefaults(suiteName: defaultsSuiteName)!,
+            alwaysPro: true
         )
     }()
 
@@ -124,15 +125,20 @@ class LicenseManager {
         return daysSinceTrialStart + 1
     }
 
-    init(clock: Clock, keychain: Keychain, api: LicenseAPI, defaults: UserDefaults) {
+    /// Local-build switch: Pro is permanently available, so no trial starts and no license server is contacted.
+    let alwaysPro: Bool
+
+    init(clock: Clock, keychain: Keychain, api: LicenseAPI, defaults: UserDefaults, alwaysPro: Bool = false) {
         self.clock = clock
         self.keychain = keychain
         self.api = api
         self.defaults = defaults
+        self.alwaysPro = alwaysPro
     }
 
     func initialize() {
         state = computeState()
+        guard !alwaysPro else { return }
         scheduleAsyncRevalidationIfNeeded()
     }
 
@@ -223,6 +229,7 @@ class LicenseManager {
         #if DEBUG
         if hasMockedLicense { return state }
         #endif
+        guard !alwaysPro else { return .pro }
         if keychain.value(account: Self.keychainKeyAccount) != nil {
             let lastValidationResult = defaults.bool(forKey: "lastValidationResult")
             guard lastValidationResult else { return .trialExpired }
