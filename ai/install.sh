@@ -8,12 +8,15 @@ cd "$(dirname "$0")/.."
 identity="${SIGN_IDENTITY:--}"
 app="DerivedData/Build/Products/Release/AltTab.app"
 dest="/Applications/AltTab.app"
+# CI injects the version via local.xcconfig; without it CFBundleVersion is empty and App.version traps at launch.
+version="$(grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+' changelog.md)"
 
 xcodebuild \
   -project alt-tab-macos.xcodeproj \
   -scheme Release \
   -configuration Release \
   -derivedDataPath DerivedData \
+  CURRENT_PROJECT_VERSION="$version" \
   CODE_SIGN_IDENTITY="$identity" \
   OTHER_CODE_SIGN_FLAGS="--timestamp=none" \
   | tail -n 20
